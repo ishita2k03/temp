@@ -1,0 +1,333 @@
+#include <GL/glut.h>
+#include <iostream>
+using namespace std;
+
+//BRESENHAM-CIRCLE
+void plot(int x, int y, int xc, int yc) {
+    glBegin(GL_POINTS);
+    glVertex2i(xc + x, yc + y);
+    glVertex2i(xc + x, yc - y);
+    glVertex2i(xc - x, yc + y);
+    glVertex2i(xc - x, yc - y);
+    glVertex2i(xc + y, yc + x);
+    glVertex2i(xc - y, yc + x);
+    glVertex2i(xc + y, yc - x);
+    glVertex2i(xc - y, yc - x);
+    glEnd();
+    glFlush();
+}
+
+void breCircle(int xc, int yc, int r) {
+    int d, x, y;
+    x = 0;
+    y = r;
+    d = 3 - 2 * r;
+    while (x <= y) {
+        plot(x, y, xc, yc);
+        if (d < 0) {
+            d = d + 4 * x + 6;
+            x = x + 1;
+        }
+        if (d >= 0) {
+            d = d + 4 * (x - y) + 10;
+            x = x + 1;
+            y = y - 1;
+        }
+    }
+}
+
+//DDA-LINE
+
+void ddaLine(float x1, float y1, float x2, float y2) {
+    float dy, dx, step, x, y, k, Xin, Yin;
+    dx = x2 - x1;
+    dy = y2 - y1;
+    if (abs(dx) > abs(dy)) {
+        step = abs(dx);
+    }
+    else
+        step = abs(dy);
+    Xin = dx / step;
+    Yin = dy / step;
+    x = x1;
+    y = y1;
+    glBegin(GL_POINTS);
+    glVertex2i(x, y);
+    glEnd();
+    for (k = 1; k <= step; k++) {
+        x = x + Xin;
+        y = y + Yin;
+        glBegin(GL_POINTS); //specify drawing points
+        glVertex2i(x, y); //drawing individual points
+        glEnd(); //drawing is complete
+    }
+    glFlush(); //executing commands if left immediately
+}
+
+void display(void)
+{
+    glClear(GL_COLOR_BUFFER_BIT); //clears color buffer(memory used to store color of pixels)
+    glLineWidth(10.0);
+    glColor3f(0.0, 1.0, 0.0);
+    glPointSize(8.0);
+    breCircle(50, 110, 8);
+    ddaLine(30, 70, 70, 70);
+    ddaLine(30, 130, 70, 130);
+    ddaLine(30, 70, 30, 130);
+    ddaLine(70, 70, 70, 130);
+    ddaLine(10, 70, 30, 70);
+    ddaLine(10, 70, 10, 130);
+    ddaLine(10, 130, 30, 130);
+    ddaLine(10, 130, 20, 160);
+    ddaLine(20, 160, 30, 130);
+    ddaLine(20, 160, 60, 160);
+    ddaLine(60, 160, 70, 130);
+    ddaLine(15, 70, 15, 110);
+    ddaLine(25, 70, 25, 110);
+    ddaLine(15, 110, 25, 110);
+
+}
+
+void myInit(void)
+{
+    glClearColor(0.0, 0.0, 0.0, 0.0); //background color (R,G,B,BLACK)
+    glColor3f(1.0, 0.0, 0.0); //color for line/point/circle (R,G,B)
+    glMatrixMode(GL_PROJECTION); //how the scene is projected onto the 2D screen.
+    gluOrtho2D(0.0, 100.0, 0.0, 200.0); //for orthographic view
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); //single buffer,RCG color scheme
+    //glutInitWindowSize(500,500);
+    glutInitWindowSize(500, 700);
+    glutInitWindowPosition(50, 100);
+    glutCreateWindow("Hello Class");
+    glutDisplayFunc(display);
+    myInit();
+    glutMainLoop();
+}
+
+//BRESENHAM-LINEE
+
+void draw_pixel(int x, int y)
+{
+	glBegin(GL_POINTS);
+	glVertex2i(x, y);
+	glEnd();
+}
+
+void draw_line(int x1, int x2, int y1, int y2) {
+	int dx, dy, i, e;
+	int incx, incy, inc1, inc2;
+	int x, y;
+	dx = x2 - x1;
+	dy = y2 - y1;
+	if (dx < 0) dx = -dx;
+	if (dy < 0) dy = -dy;
+	incx = 1;
+	if (x2 < x1) incx = -1;
+	incy = 1;
+	if (y2 < y1) incy = -1;
+	x = x1; y = y1;
+	if (dx > dy) {
+		draw_pixel(x, y);
+		e = 2 * dy - dx;
+		inc1 = 2 * (dy - dx);
+		inc2 = 2 * dy;
+		for (i = 0; i < dx; i++)
+		{
+			if (e >= 0)
+			{
+				y += incy;
+				e += inc1;
+			}
+			else
+				e += inc2;
+			x += incx;
+			draw_pixel(x, y);
+		}
+	}
+	else
+	{
+		draw_pixel(x, y);
+		e = 2 * dx - dy;
+		inc1 = 2 * (dx - dy);
+		inc2 = 2 * dx;
+		for (i = 0; i < dy; i++)
+		{
+			if (e >= 0)
+			{
+				x += incx;
+				e += inc1;
+			}
+			else
+				e += inc2;
+			y += incy;
+			draw_pixel(x, y);
+		}
+	}
+}
+
+//MIDPOINT-CIRCLE
+//can use draw_pixel instead of plot
+
+void midPointCircleAlgo()
+{
+	int x = 0;
+	int y = r;
+	float decision = 5 / 4 - r;
+	plot(x, y);
+
+	while (y > x)
+	{
+		if (decision < 0)
+		{
+			x++;
+			decision += 2 * x + 1;
+		}
+		else
+		{
+			y--;
+			x++;
+			decision += 2 * (x - y) + 1;
+		}
+		plot(x, y);
+		plot(x, -y);
+		plot(-x, y);
+		plot(-x, -y);
+		plot(y, x);
+		plot(-y, x);
+		plot(y, -x);
+		plot(-y, -x);
+	}
+
+}
+
+
+//MID-POINT-ELLIPSE
+
+#include <GL/glut.h>
+#include<iostream>
+using namespace std;
+int rx, ry;//semi-Major axis & semi Minor Axis
+int xCenter, yCenter;//center of ellipse
+void myinit(void)
+{
+    glClearColor(1.0, 1.0, 1.0, 0.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0.0, 640.0, 0.0, 480.0);
+}
+void setPixel(GLint x, GLint y)
+{
+    glBegin(GL_POINTS);
+    glVertex2i(x, y);
+    glEnd();
+}
+
+void ellipseMidPoint()
+{
+    //int xCenter = 250;
+    //int yCenter = 300;
+    //int rx = 200;
+    //int ry = 200;
+
+    //plotting for 1st region of 1st quardant and the slope will be < -1
+     //----------------------Region-1------------------------//
+    float x = 0;
+    float y = ry;//(0,ry) ---
+    float p1 = ry * ry - (rx * rx) * ry + (rx * rx) * (0.25);
+    //slope
+    float dx = 2 * (ry * ry) * x;
+    float dy = 2 * (rx * rx) * y;
+    while (dx < dy)
+    {
+        //plot (x,y)
+        setPixel(xCenter + x, yCenter + y);
+        setPixel(xCenter - x, yCenter + y);
+        setPixel(xCenter + x, yCenter - y);
+        setPixel(xCenter - x, yCenter - y);
+        if (p1 < 0)
+        {
+            x = x + 1;
+            dx = 2 * (ry * ry) * x;
+            p1 = p1 + dx + (ry * ry);
+        }
+        else
+        {
+            x = x + 1;
+            y = y - 1;
+            dx = 2 * (ry * ry) * x;
+            dy = 2 * (rx * rx) * y;
+            p1 = p1 + dx - dy + (ry * ry);
+        }
+    }
+    //ploting for 2nd region of 1st quardant and the slope will be > -1
+     //----------------------Region-2------------------------//
+    float p2 = (ry * ry) * (x + 0.5) * (x + 0.5) + (rx * rx) * (y - 1) * (y - 1) - (rx * rx) * (ry * ry);
+
+
+    while (y > 0)
+    {
+        //plot (x,y)
+        setPixel(xCenter + x, yCenter + y);
+        setPixel(xCenter - x, yCenter + y);
+        setPixel(xCenter + x, yCenter - y);
+        setPixel(xCenter - x, yCenter - y);     //glEnd();
+        if (p2 > 0)
+        {
+            x = x;
+            y = y - 1;
+            dy = 2 * (rx * rx) * y;
+            //dy = 2 * rx * rx *y;
+            p2 = p2 - dy + (rx * rx);
+        }
+        else
+        {
+            x = x + 1;
+            y = y - 1;
+            dy = dy - 2 * (rx * rx);
+            dx = dx + 2 * (ry * ry);
+            p2 = p2 + dx -
+                dy + (rx * rx);
+        }
+    }
+
+}
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);     // clear the screen
+    glColor3f(1.0, 0.0, 0.0);          // red foreground
+    glPointSize(2.0);               // size of points to be drawin (in pixel)
+
+    //establish a coordinate system for the image
+
+    ellipseMidPoint();
+    glFlush(); // send all output to the display
+}
+
+int main(int argc, char** argv)
+{
+    cout << "\n\nEnter Center Of Ellipse  \n\n";
+    cout << "\n x = ";
+    cin >> xCenter;
+
+    cout << "\n y = ";
+    cin >> yCenter;
+
+    cout << " Enter a Semi Major Axix : ";
+    cin >> rx;
+    cout << " \nEnter a Semi Minor Axis: ";
+    cin >> ry;
+    glutInit(&argc, argv);
+    glutInitWindowSize(640, 480); // set the size of the window
+    glutInitWindowPosition(10, 10); // the position of the top-left of window
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutCreateWindow("Midpoint Ellipse Drawing Algorithm");
+    myinit();
+    glutDisplayFunc(display); // set the gl display callback function
+    glutMainLoop(); // enter the GL event loop
+
+}
